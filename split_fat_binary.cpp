@@ -1,3 +1,8 @@
+/*
+*function:extract armv8_64 arch Mach-O file from fat Mach-O binary
+*author : xiesikefu
+*date : 2019.6.27
+*/
 #include<stdio.h>
 #include<sys/mman.h>
 #include <fcntl.h>
@@ -9,7 +14,9 @@
 int need_convert;
 
 /*
-    将目标uint32_t进行大小端转换
+    param:1.target uint32_t num
+    function: convert Big Endian or Little Endian of a uint32_t num
+    return: the converted num or the original num
  */
 uint32_t convert_uint32_t(uint32_t target_num){
     if(need_convert==0){
@@ -33,6 +40,11 @@ uint32_t convert_uint32_t(uint32_t target_num){
     return result_num;
 }
 
+/*
+    param:1.target uint64_t num
+    function: convert Big Endian or Little Endian of a uint64_t num
+    return: the converted num or the original num
+ */
 uint64_t convert_uint64_t(uint64_t target_num){
     if(need_convert==0){
         return target_num;
@@ -49,6 +61,11 @@ uint64_t convert_uint64_t(uint64_t target_num){
     return result_num;
 }
 
+/*
+    param:1.target file's name
+    function: map the target fat binary file into memory 
+    return : the address of the mapped file
+*/
 uint8_t* map_file_in_mem(char* file_name){
     FILE* tmp_file = fopen(file_name,"rb");
     fseek(tmp_file,0,SEEK_END);
@@ -64,7 +81,11 @@ uint8_t* map_file_in_mem(char* file_name){
     return file_pointer;
 }
 
-
+/*
+   param: 1.the start address of the fatBinary; 2.the offset of the armv8_64 arch; 3. the size of the armv8_64 file; 4.Is the fatBinary a 64bit file
+   function: dump the armv8_64 file by the offset and size;
+   return: void
+*/
 void dump_file(uint8_t* file_p, uint64_t offset, uint64_t size, uint32_t is_64){
     FILE* tmp_file;
     if(is_64==1){
@@ -80,6 +101,11 @@ void dump_file(uint8_t* file_p, uint64_t offset, uint64_t size, uint32_t is_64){
     fclose(tmp_file);
 }
 
+/*
+    param:1.the start address of the fatBinary
+    function: read the fat header and check each arch to get the offset and size of the armv8_64
+    return void
+*/
 void extract_file_from_fat(uint8_t* file_p){
     printf("start to extract file from fat\n");
     fat_header* fat_h_p = (fat_header*)file_p;
@@ -120,6 +146,11 @@ void extract_file_from_fat(uint8_t* file_p){
     
 }
 
+/*
+    param:1.the start address of the fatBinary
+    function: read the fat header and check each arch to get the offset and size of the armv8_64 , the fat binary is fat_64;
+    return void
+*/
 void extract_file_from_fat_64(uint8_t* file_p){
     printf("start to extract file from fat_64");
     fat_header* fat_h_p = (fat_header*)file_p;
